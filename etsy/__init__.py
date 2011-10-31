@@ -1,4 +1,4 @@
-from _v2 import EtsyV2 as Etsy
+from _v2 import Association, EtsyV2 as Etsy
 from etsy_env import EtsyEnvSandbox, EtsyEnvProduction
 
 

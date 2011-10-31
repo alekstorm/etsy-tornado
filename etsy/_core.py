@@ -141,10 +141,16 @@ class APIMethod(object):
             ps[p] = kwargs[p]
             del kwargs[p]
 
+        fields = kwargs.pop('fields', None)
+        includes = kwargs.pop('includes', None)
+
         self.type_checker(self.spec, **kwargs)
+
+        if fields:
+            kwargs['fields'] = ','.join(fields)
+        if includes:
+            kwargs['includes'] = ','.join([str(include) for include in includes])
         return self.api._get(self.spec['http_method'], self.uri_format % ps, **kwargs)
-
-
 
 
 class MethodTableCache(object):

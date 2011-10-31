@@ -24,3 +24,31 @@ class EtsyV2(API):
         if self.etsy_oauth_client is not None:
             return self.etsy_oauth_client.do_oauth_request(url, http_method, content_type, body)
         return API._get_url(self, url, http_method, content_type, body)
+
+
+class Association(object):
+    class Bounds(object):
+        def __init__(self, limit, offset=None):
+            self.limit = limit
+            self.offset = offset
+
+    def __init__(self, name, fields=None, scope=None, bounds=None, child=None):
+        self.name = name
+        self.fields = fields
+        self.scope = scope
+        self.bounds = bounds
+        self.child = child
+
+    def __str__(self):
+        elems = [self.name]
+        if self.fields is not None:
+            elems.extend(['(', ','.join(self.fields), ')'])
+        if self.scope is not None:
+            elems.extend([':', self.scope])
+        if self.bounds is not None:
+            elems.extend([':', str(self.bounds.limit)])
+            if self.bounds.offset is not None:
+                elems.extend([':', str(self.bounds.offset)])
+        if self.child is not None:
+            elems.extend(['/', str(self.child)])
+        return ''.join(elems)
