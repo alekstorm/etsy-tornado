@@ -24,7 +24,7 @@ class TypeChecker(object):
             }
 
 
-    def __call__(self, method, **kwargs):
+    def __call__(self, method, kwargs):
         params = method['params']
         for k, v in kwargs.items():
             if k == 'includes': continue
@@ -33,7 +33,7 @@ class TypeChecker(object):
                 raise ValueError('Unexpected argument: %s=%s' % (k, v))
             
             t = params[k]
-            checker = self.checkers.get(t, None) or self.compile(t)
+            checker = self.compile(t)
             ok, converted = checker(v)
             if not ok:
                 raise ValueError(
@@ -42,12 +42,19 @@ class TypeChecker(object):
 
 
     def compile(self, t):
+        if t in self.checkers:
+            return self.checkers[t]
         if t.startswith('enum'):
-            f = self.compile_enum(t)
-        else:
-            f = self.always_ok
-        self.checkers[t] = f
-        return f
+            return self.compile_enum(t)
+        if t.startswith('array'):
+            sub_t = self.compile(t[6:-1])
+            def check_array(array):
+                if not isinstance(array, list) or len(array) == 0:
+                    return False, array
+                ok_elems, serialized_elems = zip(*map(sub_t, array)) if len(array) > 0 else ([], [])
+                return reduce(lambda a,b: a and b, ok_elems, True), ','.join(serialized_elems)
+            return check_array
+        return self.always_ok
 
 
     def compile_enum(self, t):
@@ -64,13 +71,13 @@ class TypeChecker(object):
     def check_int(self, value):
         if isinstance(value, long):
             return True, value
-        return isinstance(value, int), value
+        return isinstance(value, int), str(value)
 
     
     def check_float(self, value):
         if isinstance(value, int):
             return True, value
-        return isinstance(value, float), value
+        return isinstance(value, float), str(value)
 
     
     def check_string(self, value):
@@ -110,21 +117,16 @@ class APIMethod(object):
 
     def compile(self):
         uri = self.spec['uri']
-        self.positionals = re.findall('{(.*)}', uri)
+        self.positionals = re.findall(':([^/]+)', uri)
 
         for p in self.positionals:
-            uri = uri.replace('{%s}' % p, '%%(%s)s' % p)
+            uri = re.sub(':%s(?=/|$)' % p, '%%(%s)s' % p, uri)
         self.uri_format = uri
 
         self.compiled = True
 
 
     def invoke(self, *args, **kwargs):
-        if args and not self.positionals:
-            raise ValueError(
-                'Positional argument(s): %s provided, but this method does '
-                'not support them.' % (args,))
-
         if len(args) > len(self.positionals):
             raise ValueError('Too many positional arguments.')
 
@@ -141,7 +143,8 @@ class APIMethod(object):
             ps[p] = kwargs[p]
             del kwargs[p]
 
-        self.type_checker(self.spec, **kwargs)
+        self.type_checker(self.spec, ps)
+        self.type_checker(self.spec, kwargs)
         return self.api._get(self.spec['http_method'], self.uri_format % ps, **kwargs)
 
 
