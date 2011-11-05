@@ -7,7 +7,7 @@ from etsy import Etsy, EtsyEnvSandbox, EtsyEnvProduction
 from etsy.oauth import EtsyOAuthClient
 
 logging_enabled = True
-etsy_env = EtsyEnvProduction()
+etsy_env = EtsyEnvProduction
 
 def my_log(msg):
     if logging_enabled: print(msg)
