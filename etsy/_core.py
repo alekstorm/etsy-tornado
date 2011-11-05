@@ -7,7 +7,7 @@ import os
 import re
 import tempfile
 import time
-from _multipartformdataencode import encode_multipart_formdata
+from _util import encode_multipart_formdata
 
 
 missing = object()
