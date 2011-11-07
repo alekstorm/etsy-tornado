@@ -15,7 +15,7 @@ setup(
     keywords = 'etsy api handmade',
     packages = ['etsy'],
     long_description = long_description,
-    test_suite = 'test.test_core',
+    test_suite = 'test.core',
     install_requires=['simplejson >= 2.0'],
     extras_require = {
         'OAuth': ["oauth2>=1.2.0"],
