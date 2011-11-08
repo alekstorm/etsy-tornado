@@ -65,7 +65,7 @@ class EtsyV2(object):
         def methods_callback(methods):
             logger.info('Loaded method table: %r', methods)
             self._methods = dict([(method['name'], method) for method in methods])
-            callback()
+            callback(self)
         self._get_method_table(methods_callback)
 
     def __getattr__(self, name):
