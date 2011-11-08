@@ -15,11 +15,11 @@ from _util import encode_multipart_formdata
 from env import SandboxEnv
 from throttled_httpclient import ThrottledAsyncHTTPClient
 
-__version__ = '0.3.1'
-__author__ = 'Dan McKinley'
-__copyright__ = 'Copyright 2010, Etsy Inc.'
+__version__ = '0.4'
+__author__ = 'Alek Storm, Dan McKinley'
+__copyright__ = 'Copyright 2011, Alek Storm. Copyright 2010, Etsy Inc.'
 __license__ = 'GPL v3'
-__email__ = 'dan@etsy.com'
+__email__ = 'alek.storm@gmail.com'
 
 logger = logging.getLogger('etsy')
 
