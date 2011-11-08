@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from datetime import timedelta
 try:
     import simplejson as json
 except ImportError:
@@ -6,13 +7,13 @@ except ImportError:
 import logging
 import re
 from tornado import gen
-from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop
 from tornado.template import Template
 from urllib import urlencode
 
 from _util import encode_multipart_formdata
 from env import SandboxEnv
+from throttled_httpclient import ThrottledAsyncHTTPClient
 
 __version__ = '0.3.1'
 __author__ = 'Dan McKinley'
@@ -52,7 +53,7 @@ class EtsyV2(object):
             }
         """
 
-        self.http_client = AsyncHTTPClient(io_loop=io_loop)
+        self.http_client = ThrottledAsyncHTTPClient(max_clients=5, period=timedelta(seconds=1), io_loop=io_loop)
         self.api_key = api_key
         self.env = env
         self.oauth_client = oauth_client
